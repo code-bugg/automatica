@@ -2,7 +2,7 @@ import random
 
 class Grammar:
 
-    def __init__(self, V_n , V_t, P, S: str):
+    def __init__(self, V_n: set[str], V_t: set[str], P: dict[str, list[str]], S: str):
         self.V_n = V_n      #SET of nonterminal values
         self.V_t = V_t      #SET of terminal values
         self.P = P          #DICTIONARY of transformations
@@ -28,6 +28,27 @@ class Grammar:
                 return False
         return True
 
+class FiniteAutomaton:
+    def __init__(self, Q, Sigma, delta, q0, F):
+        self.Q = Q
+        self.Sigma = Sigma
+        self.delta = delta
+        self.q0 = q0
+        self.F = F
+    
+    def string_belong_to_language(self, input_string: str) -> bool:
+        current_states = {self.q0}
+
+        for char in input_string:
+            next_states = set()
+            for state in current_states:
+                if (state, char) in self.delta:
+                    next_states.update(self.delta[(state,char)])
+                current_states
+
+                if not current_states:
+                    return False
+            return any(state in self.F for state in current_states)
 
 if __name__ == "__main__":
     some_P = {
