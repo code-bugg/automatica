@@ -19,12 +19,30 @@ class Grammar:
             if target in self.P:
                 replacement = random.choice(self.P[target])
                 language_string = language_string.replace(target, replacement, 1)
-            return language_string
+        return language_string
 
 
-    def isterminal(self, state: str) -> bool:
+    def is_terminal(self, state: str) -> bool:
         return all(char not in self.V_n for char in state)
 
+    def to_finite_automaton(self):
+        Q = self.V_n | {'X'}
+        Sigma = self.V_t
+        q0 = self.S
+        delta = {}
+        F = {'X'}
+
+        for state, rules in self.P.items():
+            for rule in rules:
+                if len(rule) == 2 and rule[0] in Sigma and rule[1] in self.V_n:
+                    terminal, next_state = rule[0], rule[1]
+                    delta.setdefault((state, terminal), []).append(next_state)
+
+                elif len(rule) == 1 and rule in Sigma:
+                    terminal = rule
+                    delta.setdefault((state, terminal), []).append('X')
+        return FiniteAutomaton(Q, Sigma, delta, q0, F)
+    
 class FiniteAutomaton:
     def __init__(self, Q, Sigma, delta, q0, F):
         self.Q = Q
@@ -41,24 +59,39 @@ class FiniteAutomaton:
             for state in current_states:
                 if (state, char) in self.delta:
                     next_states.update(self.delta[(state,char)])
-                current_states
-
-                if not current_states:
-                    return False
-            return any(state in self.F for state in current_states)
+            current_states = next_states
+            if not current_states:
+                return False
+        return any(state in self.F for state in current_states)
 
 if __name__ == "__main__":
-    some_P = {
-            "AB": "aB",
-            "A": "aa",
-            "Ba": "bbA",
-            "Bb": "bBa"
+    v_n = {"S", "A", "B", "C"}
+    v_t = {"a", "b", "c"}
+    p = {
+        "S": ["aA", "bB", "cC", "aB", "aC", "bA", "bC", "cA", "cB"],
+        "A": ["aB", "c"],
+        "B": ["bC", "a"],
+        "C": ["cA", "b"]
     }
-    some_V_n = set(("A", "B"))
-    some_V_t = set(("a", "b"))
-    some_S = "ABBA"
-    
-    some_grammar = Grammar(some_V_n, some_V_t, some_P, some_S)
+    s = "S"
 
-    for i in range(5):
-        print(some_grammar.generate_string())    
+    grammar = Grammar(v_n, v_t, p, s)
+
+    print("Generating strings:")
+    generated_examples = []
+    for _ in range(5):
+        word = grammar.generate_string()
+        generated_examples.append(word)
+        print(word)
+    
+    print()
+    print("FA validation:")
+    fa = grammar.to_finite_automaton()
+
+    for word in generated_examples:
+        is_valid = fa.string_belong_to_language(word)
+        print(f"{word} -> {is_valid}")
+
+    test_str = "abc"
+    print("Test:")
+    print(f"{word} -> {is_valid}")
