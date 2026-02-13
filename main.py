@@ -9,24 +9,21 @@ class Grammar:
         self.S = S          #STRING of initial state
 
     def generate_string(self) -> str:
-        language_string = str(self.S)     #copy the inital state to apply further random transformations
-        P_source = list(self.P.keys())
-        randindex = 0
-        toreplace = ""
-        while not self.isterminal(language_string):
-            randindex = random.randint(0, len(P_source) - 1)                        #index of the randomly chosed key of the P dictionary
-            toreplace = self.P.get(P_source[randindex])                         #toreplace - the value that will replace the given substring
-            #print(P_source[randindex], toreplace)
-            language_string = language_string.replace(P_source[randindex], toreplace, 1)          #replaces the old substring with the procedure one, only the first occurance
-            #print(language_string) 
-        return language_string
+        language_string = self.S
+        while not self.is_terminal(language_string):
+            available_non_terminals = [char for char in language_string if char in self.V_n]
+            if not available_non_terminals:
+                break
+
+            target = available_non_terminals[0]
+            if target in self.P:
+                replacement = random.choice(self.P[target])
+                language_string = language_string.replace(target, replacement, 1)
+            return language_string
 
 
     def isterminal(self, state: str) -> bool:
-        for nonterminal in self.V_n:
-            if state.count(nonterminal) > 0:
-                return False
-        return True
+        return all(char not in self.V_n for char in state)
 
 class FiniteAutomaton:
     def __init__(self, Q, Sigma, delta, q0, F):
