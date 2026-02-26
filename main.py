@@ -197,7 +197,9 @@ if __name__ == "__main__":
     s = "S"
 
     grammar = Grammar(v_n, v_t, p, s)
-
+    #print the grammar class 
+    print("Grammar type verification: ", grammar.classify())
+    
     print("Generating strings:")
     generated_examples = []
     for _ in range(5):
@@ -206,13 +208,61 @@ if __name__ == "__main__":
         print(word)
     
     print()
+
+    #working with the casting of grammar to automaton
     print("FA validation:")
     fa = grammar.to_finite_automaton()
+    #retrieve the regular grammar from the finite automaton
+    rg = fa.to_regular_grammar()
+    print("     Non-terminals:  ", rg.V_n)
+    print("     Terminals: ", rg.V_t)
+    print("     Start symbol: ", rg.S)
+    print("     Productions: ")
+    for lhs, prods in sorted(rg.P.items()):
+        print(f"        {lhs} -> {' | '.join(prods)}")
+    print()
 
-    for word in generated_examples:
-        is_valid = fa.string_belong_to_language(word)
-        print(f"{word} -> {is_valid}")
+    #checking determinism of the finite automaton
+    print("Determinism check")
+    det = fa.is_deterministic()
+    print(f"    FA is {'DETERMINISTIC (DFA)' if det else 'NON-DETERMINISTIC (NDFA)'}")
+    print()
 
-    test_str = "abc"
-    print("Test:")
-    print(f"{test_str} -> {fa.string_belong_to_language(test_str)}")
+    #converting NDFA to DFA
+    if not det:
+        dfa = fa.to_dfa()
+        print(dfa)
+        print(f"    DFA is deterministic: {dfa.is_deterministic()}")
+    else:
+        print("     FA is already DFA - no conversion needed")
+    print()
+
+    #final verification
+    print("Formal verification")
+    dfa = fa.to_dfa()
+    for _ in range(6):
+        word = grammar.generate_string()
+        ndfa_ok = fa.string_belong_to_language(word)
+        dfa_ok = dfa.string_belong_to_language(word)
+        match = "matched" if ndfa_ok == dfa_ok else "mismatched"
+        print(f"    '{word}' NDFA = {ndfa_ok} DFA = {dfa_ok} {match}")
+    print()
+
+    #extra testing
+    print("Additional testing")
+    ndfa2 = FiniteAutomaton(
+        Q={'q0', 'q1', 'q2'},
+        Sigma={'a', 'b'},
+        delta={
+            ('q0', 'a'): ['q0', 'q1'],
+            ('q0', 'b'): ['q0'],
+            ('q1', 'b'): ['q2'],
+        },
+        q0='q0',
+        F={'q2'}
+    )
+    print(ndfa2)
+    print(ndfa2.is_deterministic())
+    dfa2 = ndfa2.to_dfa()
+    print(dfa2)
+    print(dfa2.is_deterministic)
