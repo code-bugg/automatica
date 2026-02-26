@@ -43,6 +43,56 @@ class Grammar:
                     delta.setdefault((state, terminal), []).append('X')
         return FiniteAutomaton(Q, Sigma, delta, q0, F)
     
+    def classify(self) -> str:
+        if self._is_type3():
+            return "Type 3 (regular)"
+        if self._is_type2():
+            return "Type 2 (context-free)"
+        if self._is_type1():
+            return "Type 1 (context-sensitive)"
+        return "Type 0 (unrestricted)"
+
+    def _is_type3(self) -> bool:
+        right_linear = True
+        left_linear = True
+        for lhs, productions in self.P.items():
+            if lhs not in self.V_n or len(lhs) != 1:
+                right_linear = left_linear = False
+                break
+            for rhs in productions:
+                is_rl = (
+                        (len(rhs) == 1 and rhs in self.V_t) or
+                        (len(rhs) == 2 and rhs[0] in self.V_t and rhs[1] in self.V_n)
+                )
+                is_ll = (
+                        (len(rhs) == 1 and rhs in self.V_t) or
+                        (len(rhs) == 2 and rhs[0] in self.V_n and rhs[1] in self.V_t)
+                )
+                if not is_rl:
+                    right_linear = False
+                if not is_ll:
+                    left_linear = False
+        return right_linear or left_linear
+
+    def _is_type2(self) -> bool:
+        for lhs in self.P:
+            if len(lhs) != 1 or lhs not in self.V_n:
+                return False
+        return True
+
+    def _is_type1(self) -> bool:
+        for lhs, productions in self.P.items():
+            for rhs in productions:
+                if rhs == '' or rhs == 'epsilon':
+                    if lhs == self.S and all(
+                            lhs not in r for rules in self.P.values() for r in rules
+                    ):
+                        continue
+                    return False
+                if len(lhs) > len(rhs):
+                    return False
+        return True
+
 class FiniteAutomaton:
     def __init__(self, Q, Sigma, delta, q0, F):
         self.Q = Q
@@ -94,4 +144,4 @@ if __name__ == "__main__":
 
     test_str = "abc"
     print("Test:")
-    print(f"{word} -> {is_valid}")
+    print(f"{test_str} -> {fa.string_belong_to_language(test_str)}")
