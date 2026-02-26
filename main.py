@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 
 class Grammar:
 
@@ -113,6 +114,76 @@ class FiniteAutomaton:
             if not current_states:
                 return False
         return any(state in self.F for state in current_states)
+    
+    def to_regular_grammar(self) -> Grammar:
+        V_n = set(self.Q)
+        V_t = set(self.Sigma)
+        P = defaultdict(list)
+
+        for (state, symbol), targets in self.delta.items():
+            for t in targets:
+                if t in self.F:
+                    P[state].append(symbol)
+                P[state].append(symbol + t)
+
+        P = {k: list(dict.fromkeys(v)) for k, v in P.items()}
+        return Grammar(V_n, V_t, dict(P), self.q0)
+
+    def is_deterministic(self) -> bool:
+        for targets in self.delta.values():
+            if len(targets) > 1:
+                return False
+        return True
+
+    def to_dfa(self) -> 'FiniteAutomaton':
+        start = frozenset({self.q0})
+        dfa_delta = {}
+        unvisited = [start]
+        visited = set()
+        visited.add(start)
+
+        while unvisited:
+            current = unvisited.pop()
+            for symbol in self.Sigma:
+                reachable = set()
+                for state in current:
+                    reachable.update(self.delta.get((state, symbol), []))
+                target = frozenset(reachable)
+                if not target:
+                    continue
+                dfa_delta[(current, symbol)] = [target]
+                if target not in visited:
+                    visited.add(target)
+                    unvisited.append(target)
+
+        dfa_Q = visited
+        dfa_F = {s for s in dfa_Q if s & self.F}
+
+        def name(fs):
+            return '_'.join(sorted(fs)) if fs else 'DEAD'
+        
+        renamed_delta = {}
+        for (src, sym), [tgt] in dfa_delta.items():
+            renamed_delta[(name(src), sym)] = [name(tgt)]
+
+        return FiniteAutomaton(
+            Q={name(s) for s in dfa_Q},
+            Sigma=self.Sigma,
+            delta=renamed_delta,
+            q0=name(start),
+            F={name(s) for s in dfa_F}
+        )
+
+    def __str__(self):
+        lines = [
+            f"States (Q)            : {sorted(self.Q)}",
+            f"Alphabet (Sigma)      : {sorted(self.Sigma)}",
+            f"Start state (q0)      : {self.q0}",
+            f"Final states (F)      : {sorted(self.F)}",
+        ]
+        for (s, a), tgts in sorted(self.delta.items()):
+            lines.append(f"     delta({s}, {a}) = {tgts}")
+        return "\n".join(lines)
 
 if __name__ == "__main__":
     v_n = {"S", "A", "B", "C"}
