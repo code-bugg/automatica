@@ -186,13 +186,12 @@ class FiniteAutomaton:
         return "\n".join(lines)
 
 if __name__ == "__main__":
-    v_n = {"S", "A", "B", "C"}
+    v_n = {"S", "A", "B"}
     v_t = {"a", "b", "c"}
     p = {
-        "S": ["aA", "bB", "cC", "aB", "aC", "bA", "bC", "cA", "cB"],
-        "A": ["aB", "c"],
-        "B": ["bC", "a"],
-        "C": ["cA", "b"]
+        "S": ["aS", "bS", "cA"],
+        "A": ["aB"],
+        "B": ["aB", "bB", "c"]
     }
     s = "S"
 
