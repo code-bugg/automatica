@@ -1,42 +1,77 @@
-# Project Title: Laboratory Work 1 - Intro to Formal Languages
+# Laboratory Work 1: Intro to Formal Languages. Regular Grammars. Finite Automata.
 
 ### Course: Formal Languages & Finite Automata
-### Author: Cretu Dumitru
-### Kudos to: Vasile Drumea with Irina Cojuhari
+### Student: Cretu Dumitru
+### Variant: 15
 
 ---
 
-## Overview
-A formal language serves as a mechanism to convey information between a sender and a receiver. This project implements the fundamental components of a language:
-* **Alphabet**: A set of valid characters (terminals).
-* **Vocabulary**: Valid words formed by the alphabet.
-* **Grammar**: A set of rules and constraints defining the language.
+## 1. Theory
+A formal language is a set of strings of symbols that may be constrained by specific rules. These components typically include:
+* **The Alphabet**: A finite set of valid characters (terminals).
+* **The Vocabulary**: The set of all valid words that can be formed.
+* **The Grammar**: A set of structural rules (productions) that define the language.
 
-## Objectives
-This project demonstrates understanding of the following concepts:
-1.  **Grammar Implementation**: Representation of a grammar as a programming object.
-2.  **String Generation**: Generating valid strings from the defined grammar.
-3.  **Grammar to Finite Automaton Conversion**: Mapping a regular grammar to a Finite Automaton (FA).
-4.  **String Validation**: Checking if an input string belongs to the language using the FA.
-
-
-
-## Project Structure
-* `main.py`: Contains the `Grammar` and `FiniteAutomaton` classes, along with demonstration logic in the `__main__` block.
-* `task.md`: Original requirements for the laboratory work.
-
-## Implementation Details
-### `Grammar` Class
-* `__init__`: Initializes the non-terminals ($V_n$), terminals ($V_t$), production rules ($P$), and the start symbol ($S$).
-* `generate_string`: Applies random production rules from $P$ to transform the start symbol into a terminal string.
-* `to_finite_automaton`: Converts the grammar object into a `FiniteAutomaton` object based on regular grammar rules ($A \rightarrow aB$ or $A \rightarrow a$).
-
-### `FiniteAutomaton` Class
-* `__init__`: Sets up the states ($Q$), alphabet ($\Sigma$), transition function ($\delta$), start state ($q_0$), and final states ($F$).
-* `string_belong_to_language`: Simulates the automaton to check if an input string is accepted.
-
-## Evaluation
-This project is stored in a public GitHub repository as required.
+According to the Chomsky hierarchy, a **Regular Grammar** (Type 3) consists of production rules where a non-terminal can be replaced by a terminal, or a terminal followed by a non-terminal (Right-Linear). These grammars are equivalent in expressive power to **Finite Automata** (FA), which are abstract machines that transition between states based on input symbols.
 
 ---
-*Deadline: 12-th February, 2026*
+
+## 2. Objectives
+1. Understand the components of a formal language.
+2. Implement a `Grammar` class to represent the language structure.
+3. Develop a mechanism to generate 5 valid strings from the grammar.
+4. Implement functionality to convert a `Grammar` object into a `FiniteAutomaton` object.
+5. Implement a validation method in the `FiniteAutomaton` class to check if a specific string belongs to the language.
+
+---
+
+## 3. Implementation Details
+
+### Grammar Definition (Variant 15)
+The implemented grammar $G = (V_n, V_t, P, S)$ uses the following sets:
+* **Non-terminals ($V_n$):** {S, A, B}
+* **Terminals ($V_t$):** {a, b, c}
+* **Start Symbol:** S
+* **Production Rules ($P$):**
+  1. S → aS
+  2. S → bS
+  3. S → cA
+  4. A → aB
+  5. B → aB
+  6. B → bB
+  7. B → c
+
+### Key Methods
+#### `Grammar.generate_string()`
+This method starts with the symbol `S` and performs a derivation process. It identifies non-terminals in the current string and replaces them with a random production from the dictionary $P$ until no non-terminals remain.
+
+#### `Grammar.to_finite_automaton()`
+This function maps the Right-Linear production rules to FA transitions:
+* Rules like $S \rightarrow aS$ are mapped to $\delta(S, a) = S$.
+* Rules like $B \rightarrow c$ (terminal only) are mapped to a transition to a special final state 'X'.
+
+#### `FiniteAutomaton.string_belong_to_language()`
+This method simulates the automaton's execution. It tracks a set of "active" states (handling potential non-determinism) as it consumes each character of the input string. If any final state is active after the input is exhausted, the string is accepted.
+
+---
+
+## 4. Execution Results
+
+### String Generation
+The derivation process produced the following 5 strings:
+1. `bbcaaac`
+2. `baacaabbac`
+3. `baabaabbbbbacaabbac`
+4. `abaabaacac`
+5. `bacac`
+
+### FA Validation
+The converted Finite Automaton was used to verify the strings:
+* `bbcaaac` -> **True**
+* `baacaabbac` -> **True**
+* `bacac` -> **True**
+
+---
+
+## 5. Conclusions
+This laboratory work successfully demonstrated the conversion of a Regular Grammar into a Finite Automaton. By implementing the transition logic ($\delta$) and the string derivation process, I validated that the strings generated by the rules of Variant 15 are correctly recognized by the corresponding automaton. The project provides a solid foundation for understanding the mechanics of formal languages and their machine representations.
