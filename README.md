@@ -1,7 +1,7 @@
 # Laboratory Works 1 & 2: Formal Languages & Finite Automata
 
 **Course:** Formal Languages & Finite Automata  
-**Author:** *(your name)*  
+**Author:** *Lungu Ilie*  
 **Variant:** 15  
 **Kudos to:** Vasile Drumea and Irina Cojuhari
 
