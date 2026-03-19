@@ -1,8 +1,8 @@
 # Laboratory Work №3 — Lexer & Scanner
 
 **Course:** Formal Languages & Finite Automata  
-**Author:** *(your name)*  
-**Group:** *(your group)*  
+**Author:** *Lungu Ilie*  
+**Group:** *FAF-241*  
 **Date:** March 2026
 
 ---
